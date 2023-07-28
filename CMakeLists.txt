@@ -13,7 +13,21 @@ set(link_lib glog::glog GTest::gtest Threads::Threads)
 set(link_math_lib ${ARMADILLO_LIBRARIES} BLAS::BLAS LAPACK::LAPACK)
 add_executable(kuiper_course main.cpp)
 
-target_include_directories(kuiper_course PUBLIC ${ARMADILLO_INCLUDE_DIRS})
+add_library(kuiper_tensor OBJECT ${PROJECT_SOURCE_DIR}/source/data/tensor.cpp)
+
+target_include_directories(
+    kuiper_tensor
+    PUBLIC
+        ${ARMADILLO_INCLUDE_DIRS} 
+        ${PROJECT_SOURCE_DIR}/include
+)
+
+target_include_directories(
+    kuiper_course 
+    PUBLIC 
+        ${ARMADILLO_INCLUDE_DIRS} 
+        ${PROJECT_SOURCE_DIR}/include
+)
 target_link_libraries(kuiper_course ${link_lib} ${link_math_lib})
 
 enable_testing()
