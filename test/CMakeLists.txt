@@ -1,11 +1,11 @@
-find_package(GTest REQUIRED)
+set(DIR_TEST ${CMAKE_CURRENT_LIST_DIR}/test_first.cpp ${CMAKE_CURRENT_LIST_DIR}/test_main.cpp)
+set(link_lib glog::glog GTest::gtest Threads::Threads)
+set(link_math_lib ${ARMADILLO_LIBRARIES} BLAS::BLAS LAPACK::LAPACK)
 
-aux_source_directory(../test DIR_TEST)
-set(link_lib glog gtest pthread  )
-set(link_math_lib armadillo blas lapack)
+add_executable(test_kuiper_course ${DIR_TEST})
 
-aux_source_directory(../source/data DIR_DATA)
-add_executable(test_kuiper_course ${DIR_TEST} ${DIR_DATA})
+include(GoogleTest)
 
-link_directories(/usr/local/lib/)
 target_link_libraries(test_kuiper_course ${link_lib} ${link_math_lib})
+
+gtest_discover_tests(test_kuiper_course)
