@@ -106,6 +106,10 @@ void Tensor<float>::Padding(const std::vector<uint32_t> &pads, float padding_val
   uint32_t pad_cols2 = pads.at(3);  // right
 
   //todo 请把代码补充在这里1
+  this->data().insert_rows(0,pad_rows1);
+  this->data().insert_rows(this->data_.n_rows,pad_rows2);
+  this->data().insert_cols(0,pad_cols1);
+  this->data().insert_cols(this->data_.n_cols,pad_cols2);
 
 }
 
@@ -125,6 +129,13 @@ void Tensor<float>::Fill(const std::vector<float> &values) {
   const uint32_t channels = this->data_.n_slices;
 
   //todo 请把代码补充在这里2
+  arma::fcube cube = arma::fcube(values.data(),3,3,3);
+  for(int i = 0 ; i < channels;i++){
+    arma::fmat p = cube.slice(i);
+    this->data_.slice(i) = p.t();
+  }
+  // set_data(cube);
+
 }
 
 void Tensor<float>::Show() {
