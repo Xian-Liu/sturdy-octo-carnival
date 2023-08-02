@@ -3,6 +3,7 @@
 //
 #include "data/load_data.hpp"
 #include <glog/logging.h>
+#include <string>
 
 namespace kuiper_infer {
 std::shared_ptr<Tensor<float >> CSVDataLoader::LoadDataWithHeader(const std::string &file_path,
@@ -38,6 +39,13 @@ std::shared_ptr<Tensor<float >> CSVDataLoader::LoadDataWithHeader(const std::str
         //todo 补充
         // 能够读取到第一行的csv列名，并存放在headers中
         // 能够读取到第二行之后的csv数据，并相应放置在data变量的row，col位置中
+        if(row == 0){
+          headers.push_back(token);
+          continue;
+        }else {
+          data.at(row-1,col) = std::stof(token);
+        }
+
       }
       catch (std::exception &e) {
         LOG(ERROR) << "Parse CSV File meet error: " << e.what();
@@ -54,8 +62,11 @@ std::shared_ptr<Tensor<float >> CSVDataLoader::LoadDataWithHeader(const std::str
 }
 
 std::shared_ptr<Tensor<float >> CSVDataLoader::LoadData(const std::string &file_path, char split_char) {
+  // 检查文件路径
   CHECK(!file_path.empty()) << "File path is empty!";
+  // 打开文件
   std::ifstream in(file_path);
+  // 检查文件是否打开成功
   CHECK(in.is_open() && in.good()) << "File open failed! " << file_path;
 
   std::string line_str;
@@ -66,18 +77,24 @@ std::shared_ptr<Tensor<float >> CSVDataLoader::LoadData(const std::string &file_
   arma::fmat &data = input_tensor->at(0);
 
   size_t row = 0;
+  // 读到 EOF 后退出循环
   while (in.good()) {
+    // 读取一行
     std::getline(in, line_str);
+    // 如果读取到空行退出
     if (line_str.empty()) {
       break;
     }
 
     std::string token;
+    // 将字符串转换为 string stream
     line_stream.clear();
     line_stream.str(line_str);
 
     size_t col = 0;
+    // 读取到 string stream 的 EOF 后退出
     while (line_stream.good()) {
+      // 依据 "," 分隔字符串
       std::getline(line_stream, token, split_char);
       try {
         data.at(row, col) = std::stof(token);
@@ -87,10 +104,11 @@ std::shared_ptr<Tensor<float >> CSVDataLoader::LoadData(const std::string &file_
         continue;
       }
       col += 1;
+      // 列太多
       CHECK(col <= cols) << "There are excessive elements on the column";
     }
 
-    row += 1;
+    row += 1;// 行太多
     CHECK(row <= rows) << "There are excessive elements on the row";
   }
   return input_tensor;
